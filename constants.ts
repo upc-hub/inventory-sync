@@ -1,0 +1,74 @@
+import { BikeSection, InventoryItem } from "./types";
+
+export const INITIAL_INVENTORY: InventoryItem[] = [
+  {
+    id: '1',
+    name: 'Continental Grand Prix 5000',
+    type: 'bicycle',
+    section: BikeSection.Wheels,
+    price: 165000,
+    quantity: 12,
+    description: 'လမ်းကြမ်းစီးရန် အကောင်းဆုံးတာယာ၊ ကြာရှည်ခံသည်။',
+    minStockThreshold: 4
+  },
+  {
+    id: '2',
+    name: 'Shimano Ultegra Cassette',
+    type: 'bicycle',
+    section: BikeSection.Drivetrain,
+    price: 210000,
+    quantity: 3,
+    description: '11-30T 11-speed ဂီယာဝိုင်း၊ ပေါ့ပါးပြီး ခိုင်ခံ့သည်။',
+    minStockThreshold: 5
+  },
+  {
+    id: '3',
+    name: 'Carbon Drop Bars',
+    type: 'bicycle',
+    section: BikeSection.Cockpit,
+    price: 450000,
+    quantity: 2,
+    description: 'ကာဗွန်ဖိုင်ဘာ လက်ကိုင်၊ လေတိုးသက်သာစေသည်။',
+    minStockThreshold: 2
+  },
+  {
+    id: '4',
+    name: 'Honda Wave 125i Engine Oil',
+    type: 'motorbike',
+    section: BikeSection.Drivetrain,
+    price: 15000,
+    quantity: 24,
+    description: 'အင်ဂျင်ဝိုင် အကောင်းစား၊ အင်ဂျင်ကို အေးမြစေသည်။',
+    minStockThreshold: 10
+  },
+  {
+    id: '5',
+    name: 'Tubeless Tire 90/90-14',
+    type: 'motorbike',
+    section: BikeSection.Wheels,
+    price: 45000,
+    quantity: 8,
+    description: 'ကျွတ်မဲ့တာယာ၊ လမ်းချော်မှု ကာကွယ်ပေးသည်။',
+    minStockThreshold: 5
+  },
+  {
+    id: '6',
+    name: 'LED Headlight Bulb',
+    type: 'motorbike',
+    section: BikeSection.Accessories,
+    price: 12000,
+    quantity: 15,
+    description: 'ညဘက်တွင် အလွန်လင်းသော LED မီးလုံး။',
+    minStockThreshold: 5
+  },
+  {
+    id: '7',
+    name: 'Rear Shock Absorber',
+    type: 'motorbike',
+    section: BikeSection.Frame,
+    price: 85000,
+    quantity: 4,
+    description: 'နောက်ရှော့ဘား၊ သက်တောင့်သက်သာ စီးနင်းနိုင်သည်။',
+    minStockThreshold: 2
+  }
+];
