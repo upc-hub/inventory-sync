@@ -384,9 +384,8 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg">
                   <span className="text-slate-500 text-xs uppercase font-bold tracking-wider">တန်ဖိုးစုစုပေါင်း</span>
-                  {/* Removed font-mono to ensure Burmese digits render with proper font */}
                   <p className="text-xl md:text-2xl text-slate-800 truncate mt-1 font-bold">
-                    {toBurmese(totalValue.toLocaleString())} Ks
+                    {toBurmese(totalValue.toLocaleString())} ကျပ်
                   </p>
                 </div>
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg">
@@ -468,6 +467,7 @@ const App: React.FC = () => {
 
       <footer className="bg-white border-t border-slate-200 mt-auto py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-slate-700 font-bold text-base mb-4">လိပ်စာ-ဈေးတောင်ဘက်၊ မိတ္ထီလာမြို့။</p>
           <div className="flex flex-col items-center gap-2">
             <h3 className="text-slate-700 font-bold text-lg leading-tight">ဦးမောင်မောင်မြင့် + ဒေါ်ထားထားမြင့်</h3>
             <h4 className="text-slate-600 font-medium text-base">မောင်အောင်ကိုကို + မဖြူဇာလှိုင်, သမီး ဟေသာလင်းလက်</h4>

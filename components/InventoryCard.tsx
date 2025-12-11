@@ -25,7 +25,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ item, onBuy, onEdit, onDe
   const formatCurrency = (amount: number) => {
     // First format to "1,000", then convert to "၁,၀၀၀"
     const standardFormat = new Intl.NumberFormat('en-MM').format(amount);
-    return toBurmese(standardFormat) + ' Ks';
+    return toBurmese(standardFormat) + ' ကျပ်';
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {

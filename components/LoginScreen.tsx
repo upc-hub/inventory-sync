@@ -31,7 +31,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, error }) => {
           <h1 className="text-xl sm:text-2xl font-bold text-slate-800 text-center leading-snug">
             သိန်းမြန်မာစက်ဘီး၊<br/>ဆိုင်ကယ်ပစ္စည်းဆိုင်
           </h1>
-          <p className="text-slate-500 text-sm mt-2">အကောင့်ဝင်ရန်</p>
+          <p className="text-slate-600 font-semibold text-sm mt-1 text-center">
+            လိပ်စာ-ဈေးတောင်ဘက်၊ မိတ္ထီလာမြို့။
+          </p>
+          <p className="text-slate-500 text-sm mt-4">အကောင့်ဝင်ရန်</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

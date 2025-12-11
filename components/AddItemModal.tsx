@@ -183,7 +183,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">စျေးနှုန်း (Ks)</label>
+              <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">စျေးနှုန်း (ကျပ်)</label>
               <input
                 required
                 type="text"
