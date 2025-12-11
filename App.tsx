@@ -139,25 +139,33 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
           {/* Logo / Title */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="bg-gradient-to-tr from-sky-600 to-blue-700 w-9 h-9 rounded-lg flex items-center justify-center shadow-md shadow-sky-500/20">
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="bg-gradient-to-tr from-sky-600 to-blue-700 w-10 h-10 rounded-lg flex items-center justify-center shadow-md shadow-sky-500/20 p-2">
+               {/* Simplified Bicycle Icon */}
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                 <circle cx="5.5" cy="17.5" r="3.5" />
+                 <circle cx="18.5" cy="17.5" r="3.5" />
+                 <path d="M15 6h-5a1 1 0 0 0-1 1v3" />
+                 <path d="M5.5 17.5L9 9h7l3.5 8.5" />
+                 <circle cx="15" cy="5" r="1" />
                </svg>
             </div>
-            <h1 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight hidden sm:block">
-              သိန်းမြန်မာစက်ဘီးဆိုင်
+            <h1 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight leading-tight hidden sm:block">
+              သိန်းမြန်မာစက်ဘီး၊<br className="lg:hidden"/>ဆိုင်ကယ်ပစ္စည်းဆိုင်
+            </h1>
+            <h1 className="text-base font-bold text-slate-800 tracking-tight leading-tight sm:hidden">
+              သိန်းမြန်မာ<br/>ပစ္စည်းဆိုင်
             </h1>
           </div>
 
           {/* Vehicle Type Toggle */}
-          <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <div className="hidden sm:flex bg-slate-100 p-1 rounded-lg border border-slate-200">
              <button
                onClick={() => {
                  setCurrentVehicleType('bicycle');
                  setSelectedSection(null);
                }}
-               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${currentVehicleType === 'bicycle' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
+               className={`px-3 py-1.5 rounded-md text-sm font-bold transition-all ${currentVehicleType === 'bicycle' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
              >
                စက်ဘီး
              </button>
@@ -166,16 +174,16 @@ const App: React.FC = () => {
                  setCurrentVehicleType('motorbike');
                  setSelectedSection(null);
                }}
-               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${currentVehicleType === 'motorbike' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
+               className={`px-3 py-1.5 rounded-md text-sm font-bold transition-all ${currentVehicleType === 'motorbike' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
              >
                ဆိုင်ကယ်
              </button>
           </div>
           
           {/* Action Buttons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Desktop Status */}
-            <div className="hidden md:flex gap-3 text-sm font-medium text-slate-600">
+            <div className="hidden lg:flex gap-3 text-sm font-medium text-slate-600">
                {lowStockCount > 0 && (
                  <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
                    <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"/>
@@ -207,6 +215,30 @@ const App: React.FC = () => {
                </svg>
             </button>
           </div>
+        </div>
+        
+        {/* Mobile Type Toggler (Moved from top bar on very small screens if needed, but keeping simple for now) */}
+        <div className="sm:hidden border-t border-slate-100 p-2 bg-white flex justify-center">
+             <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 w-full max-w-xs">
+               <button
+                 onClick={() => {
+                   setCurrentVehicleType('bicycle');
+                   setSelectedSection(null);
+                 }}
+                 className={`flex-1 py-1.5 rounded-md text-sm font-bold transition-all ${currentVehicleType === 'bicycle' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
+               >
+                 စက်ဘီး
+               </button>
+               <button
+                 onClick={() => {
+                   setCurrentVehicleType('motorbike');
+                   setSelectedSection(null);
+                 }}
+                 className={`flex-1 py-1.5 rounded-md text-sm font-bold transition-all ${currentVehicleType === 'motorbike' ? 'bg-white text-sky-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'}`}
+               >
+                 ဆိုင်ကယ်
+               </button>
+             </div>
         </div>
       </header>
 

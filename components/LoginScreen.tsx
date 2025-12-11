@@ -18,15 +18,20 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, error }) => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-200">
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-gradient-to-tr from-sky-600 to-blue-700 w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
-            </svg>
+          <div className="bg-gradient-to-tr from-sky-600 to-blue-700 w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30 mb-4 p-4">
+             {/* Simplified Bicycle Icon */}
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+               <circle cx="5.5" cy="17.5" r="3.5" />
+               <circle cx="18.5" cy="17.5" r="3.5" />
+               <path d="M15 6h-5a1 1 0 0 0-1 1v3" />
+               <path d="M5.5 17.5L9 9h7l3.5 8.5" />
+               <circle cx="15" cy="5" r="1" />
+             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 text-center">
-            သိန်းမြန်မာစက်ဘီးဆိုင်
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 text-center leading-snug">
+            သိန်းမြန်မာစက်ဘီး၊<br/>ဆိုင်ကယ်ပစ္စည်းဆိုင်
           </h1>
-          <p className="text-slate-500 text-sm mt-1">အကောင့်ဝင်ရန်</p>
+          <p className="text-slate-500 text-sm mt-2">အကောင့်ဝင်ရန်</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
