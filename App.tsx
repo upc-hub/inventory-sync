@@ -1,41 +1,45 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { INITIAL_INVENTORY } from './constants';
 import { BikeSection, InventoryItem, VehicleType } from './types';
 import BikeVisual from './components/BikeVisual';
 import InventoryCard from './components/InventoryCard';
 import AddItemModal from './components/AddItemModal';
 import LoginScreen from './components/LoginScreen';
 
+const API_URL = 'http://localhost:3001/items';
+
 const App: React.FC = () => {
-  // Authentication State - Initialize from localStorage
+  // Authentication State - Initialize from localStorage (Keep auth local)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('bikeShopAuth');
     return saved === 'true';
   });
   const [loginError, setLoginError] = useState('');
 
-  // Inventory State - Initialize from localStorage
-  const [items, setItems] = useState<InventoryItem[]>(() => {
-    const saved = localStorage.getItem('bikeShopItems');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse saved inventory", e);
-        return INITIAL_INVENTORY;
-      }
-    }
-    return INITIAL_INVENTORY;
-  });
+  // Inventory State - Initialize empty, will load from db.json
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Effects for Persistence
+  // Load items from json-server on mount (or when auth changes to true)
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsLoading(true);
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          setItems(data);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch inventory. Is json-server running?", err);
+          setIsLoading(false);
+        });
+    }
+  }, [isAuthenticated]);
+
+  // Effects for Auth Persistence
   useEffect(() => {
     localStorage.setItem('bikeShopAuth', String(isAuthenticated));
   }, [isAuthenticated]);
-
-  useEffect(() => {
-    localStorage.setItem('bikeShopItems', JSON.stringify(items));
-  }, [items]);
 
   const [selectedSection, setSelectedSection] = useState<BikeSection | null>(null);
   const [currentVehicleType, setCurrentVehicleType] = useState<VehicleType>('bicycle');
@@ -63,19 +67,44 @@ const App: React.FC = () => {
     setLoginError('');
   };
 
-  // --- Actions ---
+  // --- Actions with API calls ---
   
-  const handleAddItem = (newItem: Omit<InventoryItem, 'id'>) => {
+  const handleAddItem = async (newItem: Omit<InventoryItem, 'id'>) => {
     const item: InventoryItem = {
       ...newItem,
       id: Date.now().toString()
     };
+    
+    // Optimistic Update
     setItems(prev => [item, ...prev]);
+
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+    } catch (error) {
+      console.error("Error adding item:", error);
+      // Revert if failed (could implement better error handling here)
+      setItems(prev => prev.filter(i => i.id !== item.id));
+    }
   };
 
-  const handleUpdateItem = (updatedItem: InventoryItem) => {
+  const handleUpdateItem = async (updatedItem: InventoryItem) => {
+    // Optimistic Update
     setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
     setEditingItem(null);
+
+    try {
+      await fetch(`${API_URL}/${updatedItem.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedItem)
+      });
+    } catch (error) {
+      console.error("Error updating item:", error);
+    }
   };
 
   // Called when clicking trash icon
@@ -84,20 +113,47 @@ const App: React.FC = () => {
   };
 
   // Called when confirming in modal
-  const confirmDeleteItem = () => {
+  const confirmDeleteItem = async () => {
     if (itemToDelete) {
-      setItems(prev => prev.filter(item => item.id !== itemToDelete));
+      const id = itemToDelete;
+      // Optimistic Update
+      setItems(prev => prev.filter(item => item.id !== id));
       setItemToDelete(null);
+
+      try {
+        await fetch(`${API_URL}/${id}`, {
+          method: 'DELETE'
+        });
+      } catch (error) {
+        console.error("Error deleting item:", error);
+      }
     }
   };
 
-  const handleBuyItem = (id: string) => {
+  const handleBuyItem = async (id: string) => {
+    const itemToUpdate = items.find(i => i.id === id);
+    if (!itemToUpdate || itemToUpdate.quantity <= 0) return;
+
+    const newQuantity = itemToUpdate.quantity - 1;
+
+    // Optimistic Update
     setItems(prev => prev.map(item => {
-      if (item.id === id && item.quantity > 0) {
-        return { ...item, quantity: item.quantity - 1 };
+      if (item.id === id) {
+        return { ...item, quantity: newQuantity };
       }
       return item;
     }));
+
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: newQuantity })
+      });
+    } catch (error) {
+      console.error("Error buying item:", error);
+      // Revert logic could go here
+    }
   };
 
   const openAddModal = () => {
@@ -350,7 +406,11 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            {filteredItems.length === 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center py-20 text-slate-500">
+                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+              </div>
+            ) : filteredItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
