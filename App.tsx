@@ -4,7 +4,7 @@ import BikeVisual from './components/BikeVisual';
 import InventoryCard from './components/InventoryCard';
 import AddItemModal from './components/AddItemModal';
 import LoginScreen from './components/LoginScreen';
-import { INITIAL_INVENTORY } from './constants';
+import { toBurmese } from './utils';
 
 // Use relative path '/api/items'. 
 // Vite will proxy this to the json-server on the host machine.
@@ -278,12 +278,12 @@ const App: React.FC = () => {
                {lowStockCount > 0 && (
                  <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
                    <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"/>
-                   {lowStockCount} လက်ကျန်နည်း
+                   {toBurmese(lowStockCount)} လက်ကျန်နည်း
                  </span>
                )}
                {outOfStockCount > 0 && (
                  <span className="text-red-600 bg-red-50 px-2.5 py-1 rounded-full border border-red-100">
-                   {outOfStockCount} ပြတ်လပ်
+                   {toBurmese(outOfStockCount)} ပြတ်လပ်
                  </span>
                )}
             </div>
@@ -337,12 +337,12 @@ const App: React.FC = () => {
             {lowStockCount > 0 && (
               <span className="flex items-center gap-1 text-orange-600">
                 <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"/>
-                {lowStockCount} လက်ကျန်နည်း
+                {toBurmese(lowStockCount)} လက်ကျန်နည်း
               </span>
             )}
             {outOfStockCount > 0 && (
               <span className="text-red-600">
-                {outOfStockCount} ပစ္စည်းပြတ်နေသည်
+                {toBurmese(outOfStockCount)} ပစ္စည်းပြတ်နေသည်
               </span>
             )}
         </div>
@@ -384,14 +384,15 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg">
                   <span className="text-slate-500 text-xs uppercase font-bold tracking-wider">တန်ဖိုးစုစုပေါင်း</span>
-                  <p className="text-xl md:text-2xl font-mono text-slate-800 truncate mt-1 font-bold">
-                    {totalValue.toLocaleString()} Ks
+                  {/* Removed font-mono to ensure Burmese digits render with proper font */}
+                  <p className="text-xl md:text-2xl text-slate-800 truncate mt-1 font-bold">
+                    {toBurmese(totalValue.toLocaleString())} Ks
                   </p>
                 </div>
                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg">
                    <span className="text-slate-500 text-xs uppercase font-bold tracking-wider">ပစ္စည်းအရေအတွက်</span>
-                   <p className="text-xl md:text-2xl font-mono text-slate-800 mt-1 font-bold">
-                     {totalItems}
+                   <p className="text-xl md:text-2xl text-slate-800 mt-1 font-bold">
+                     {toBurmese(totalItems)}
                    </p>
                 </div>
               </div>

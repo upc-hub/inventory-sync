@@ -1,5 +1,6 @@
 import React from 'react';
 import { InventoryItem, BikeSection } from '../types';
+import { toBurmese } from '../utils';
 
 interface InventoryCardProps {
   item: InventoryItem;
@@ -20,9 +21,11 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ item, onBuy, onEdit, onDe
   const isLowStock = item.quantity <= item.minStockThreshold;
   const isOutOfStock = item.quantity === 0;
 
-  // Formatter for Myanmar currency
+  // Formatter for Myanmar currency with Burmese Digits
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-MM').format(amount) + ' Ks';
+    // First format to "1,000", then convert to "၁,၀၀၀"
+    const standardFormat = new Intl.NumberFormat('en-MM').format(amount);
+    return toBurmese(standardFormat) + ' Ks';
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
@@ -98,12 +101,14 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ item, onBuy, onEdit, onDe
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="bg-slate-50 p-2 rounded text-center border border-slate-200">
             <span className="block text-xs text-slate-500 uppercase font-bold tracking-wide">စျေးနှုန်း</span>
-            <span className="font-mono text-lg text-sky-700 font-bold">{formatCurrency(item.price)}</span>
+            {/* Removed font-mono to support Burmese digits */}
+            <span className="text-lg text-sky-700 font-bold">{formatCurrency(item.price)}</span>
           </div>
           <div className={`p-2 rounded text-center border ${isLowStock ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
             <span className="block text-xs text-slate-500 uppercase font-bold tracking-wide">လက်ကျန်</span>
-            <span className={`font-mono text-lg font-bold ${isLowStock ? 'text-red-600' : 'text-slate-800'}`}>
-              {item.quantity}
+            {/* Removed font-mono to support Burmese digits */}
+            <span className={`text-lg font-bold ${isLowStock ? 'text-red-600' : 'text-slate-800'}`}>
+              {toBurmese(item.quantity)}
             </span>
           </div>
         </div>

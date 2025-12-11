@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BikeSection, InventoryItem, VehicleType } from '../types';
 import { generateItemDetails } from '../services/geminiService';
+import { toBurmese, fromBurmese } from '../utils';
 
 interface AddItemModalProps {
   isOpen: boolean;
@@ -26,7 +27,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
     price: '',
     quantity: '',
     description: '',
-    minStockThreshold: '3'
+    minStockThreshold: '3' // Store as string to handle burmese input
   });
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -37,10 +38,10 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
         name: itemToEdit.name,
         type: itemToEdit.type,
         section: itemToEdit.section,
-        price: itemToEdit.price.toString(),
-        quantity: itemToEdit.quantity.toString(),
+        price: toBurmese(itemToEdit.price), // Show existing values in Burmese
+        quantity: toBurmese(itemToEdit.quantity),
         description: itemToEdit.description || '',
-        minStockThreshold: itemToEdit.minStockThreshold.toString()
+        minStockThreshold: toBurmese(itemToEdit.minStockThreshold)
       });
     } else {
       // Reset form for add mode
@@ -51,7 +52,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
         price: '',
         quantity: '',
         description: '',
-        minStockThreshold: '3'
+        minStockThreshold: toBurmese(3)
       });
     }
   }, [itemToEdit, isOpen]);
@@ -77,10 +78,10 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
       name: formData.name,
       type: formData.type,
       section: formData.section,
-      price: parseFloat(formData.price),
-      quantity: parseInt(formData.quantity),
+      price: fromBurmese(formData.price), // Convert back to number
+      quantity: fromBurmese(formData.quantity),
       description: formData.description,
-      minStockThreshold: parseInt(formData.minStockThreshold)
+      minStockThreshold: fromBurmese(formData.minStockThreshold)
     };
 
     if (itemToEdit) {
@@ -172,7 +173,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
                 </button>
              </div>
              <textarea
-                // removed required attribute
                 rows={3}
                 value={formData.description}
                 onChange={e => setFormData({...formData, description: e.target.value})}
@@ -186,34 +186,36 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAdd, onU
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">စျေးနှုန်း (Ks)</label>
               <input
                 required
-                type="number"
-                min="0"
-                step="0.01"
+                type="text"
+                inputMode="numeric"
                 value={formData.price}
                 onChange={e => setFormData({...formData, price: e.target.value})}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 font-medium focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
+                placeholder="၁၀၀၀"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">အရေအတွက်</label>
               <input
                 required
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
                 value={formData.quantity}
                 onChange={e => setFormData({...formData, quantity: e.target.value})}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 font-medium focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
+                placeholder="၁၀"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase mb-1.5">သတိပေးချက်</label>
               <input
                 required
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
                 value={formData.minStockThreshold}
                 onChange={e => setFormData({...formData, minStockThreshold: e.target.value})}
                 className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2.5 text-slate-900 font-medium focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all"
+                placeholder="၃"
               />
             </div>
           </div>
