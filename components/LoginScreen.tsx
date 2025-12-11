@@ -15,8 +15,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, error }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-200">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-xl border border-slate-200 mb-8">
         <div className="flex flex-col items-center mb-8">
           <div className="bg-gradient-to-tr from-sky-600 to-blue-700 w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg shadow-sky-500/30 mb-4 p-4">
              {/* Simplified Bicycle Icon */}
@@ -76,6 +76,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, error }) => {
             အကောင့်ဝင်မည်
           </button>
         </form>
+      </div>
+
+      <div className="text-center space-y-2 opacity-80">
+          <p className="text-slate-600 font-bold">ဦးမောင်မောင်မြင့် + ဒေါ်ထားထားမြင့်</p>
+          <p className="text-slate-600 font-medium text-sm">မောင်အောင်ကိုကို + မဖြူဇာလှိုင်, သမီး ဟေသာလင်းလက်</p>
+          <p className="text-slate-600 font-medium text-sm">မောင်ဟိန်းထက်</p>
       </div>
     </div>
   );

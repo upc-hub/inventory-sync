@@ -132,7 +132,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20 bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
@@ -259,7 +259,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
@@ -353,6 +353,18 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* FOOTER with Founders Names */}
+      <footer className="bg-white border-t border-slate-200 mt-auto py-8">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <h3 className="text-slate-700 font-bold text-lg leading-tight">ဦးမောင်မောင်မြင့် + ဒေါ်ထားထားမြင့်</h3>
+            <h4 className="text-slate-600 font-medium text-base">မောင်အောင်ကိုကို + မဖြူဇာလှိုင်, သမီး ဟေသာလင်းလက်</h4>
+            <p className="text-slate-600 font-medium text-base">မောင်ဟိန်းထက်</p>
+          </div>
+          <p className="text-slate-300 text-xs mt-8">© {new Date().getFullYear()} သိန်းမြန်မာ စက်ဘီးနှင့်ဆိုင်ကယ်ပစ္စည်းဆိုင်</p>
+        </div>
+      </footer>
 
       <AddItemModal 
         isOpen={isModalOpen}
