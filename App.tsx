@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { INITIAL_INVENTORY } from './constants';
 import { BikeSection, InventoryItem, VehicleType } from './types';
 import BikeVisual from './components/BikeVisual';
@@ -7,11 +7,36 @@ import AddItemModal from './components/AddItemModal';
 import LoginScreen from './components/LoginScreen';
 
 const App: React.FC = () => {
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Authentication State - Initialize from localStorage
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    const saved = localStorage.getItem('bikeShopAuth');
+    return saved === 'true';
+  });
   const [loginError, setLoginError] = useState('');
 
-  const [items, setItems] = useState<InventoryItem[]>(INITIAL_INVENTORY);
+  // Inventory State - Initialize from localStorage
+  const [items, setItems] = useState<InventoryItem[]>(() => {
+    const saved = localStorage.getItem('bikeShopItems');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved inventory", e);
+        return INITIAL_INVENTORY;
+      }
+    }
+    return INITIAL_INVENTORY;
+  });
+
+  // Effects for Persistence
+  useEffect(() => {
+    localStorage.setItem('bikeShopAuth', String(isAuthenticated));
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    localStorage.setItem('bikeShopItems', JSON.stringify(items));
+  }, [items]);
+
   const [selectedSection, setSelectedSection] = useState<BikeSection | null>(null);
   const [currentVehicleType, setCurrentVehicleType] = useState<VehicleType>('bicycle');
   const [searchQuery, setSearchQuery] = useState('');
