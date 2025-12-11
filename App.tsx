@@ -4,37 +4,51 @@ import BikeVisual from './components/BikeVisual';
 import InventoryCard from './components/InventoryCard';
 import AddItemModal from './components/AddItemModal';
 import LoginScreen from './components/LoginScreen';
+import { INITIAL_INVENTORY } from './constants';
 
-const API_URL = 'http://localhost:3001/items';
+// Use relative path '/api/items'. 
+// Vite will proxy this to the json-server on the host machine.
+// This allows other devices to access the data without CORS errors.
+const API_URL = '/api/items';
 
 const App: React.FC = () => {
-  // Authentication State - Initialize from localStorage (Keep auth local)
+  // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem('bikeShopAuth');
     return saved === 'true';
   });
   const [loginError, setLoginError] = useState('');
 
-  // Inventory State - Initialize empty, will load from db.json
+  // Inventory State
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState(false);
 
-  // Load items from json-server on mount (or when auth changes to true)
+  // --- Load Data from Server ---
   useEffect(() => {
     if (isAuthenticated) {
-      setIsLoading(true);
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-          setItems(data);
-          setIsLoading(false);
-        })
-        .catch(err => {
-          console.error("Failed to fetch inventory. Is json-server running?", err);
-          setIsLoading(false);
-        });
+      loadInventory();
     }
   }, [isAuthenticated]);
+
+  const loadInventory = () => {
+    setIsLoading(true);
+    setServerError(false);
+    fetch(API_URL)
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to connect to DB');
+        return res.json();
+      })
+      .then(data => {
+        setItems(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error("Database Error:", err);
+        setServerError(true);
+        setIsLoading(false);
+      });
+  };
 
   // Effects for Auth Persistence
   useEffect(() => {
@@ -58,7 +72,7 @@ const App: React.FC = () => {
       setIsAuthenticated(true);
       setLoginError('');
     } else {
-      setLoginError('အသုံးပြုသူအမည် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်'); // Incorrect username or password
+      setLoginError('အသုံးပြုသူအမည် သို့မဟုတ် စကားဝှက် မှားယွင်းနေပါသည်'); 
     }
   };
 
@@ -67,65 +81,68 @@ const App: React.FC = () => {
     setLoginError('');
   };
 
-  // --- Actions with API calls ---
+  // --- Database Actions ---
   
   const handleAddItem = async (newItem: Omit<InventoryItem, 'id'>) => {
-    const item: InventoryItem = {
-      ...newItem,
-      id: Date.now().toString()
-    };
+    // Generate ID temporarily for optimistic UI
+    const tempId = Date.now().toString();
+    const item: InventoryItem = { ...newItem, id: tempId };
     
-    // Optimistic Update
+    // Optimistic Update (Show immediately)
     setItems(prev => [item, ...prev]);
 
     try {
-      await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(item)
       });
+      if (!res.ok) throw new Error('Save failed');
+      // Ideally we replace the optimistic item with the real response, 
+      // but json-server returns the object we sent, so we are good.
     } catch (error) {
       console.error("Error adding item:", error);
-      // Revert if failed (could implement better error handling here)
-      setItems(prev => prev.filter(i => i.id !== item.id));
+      setServerError(true);
+      // Revert if failed
+      setItems(prev => prev.filter(i => i.id !== tempId));
     }
   };
 
   const handleUpdateItem = async (updatedItem: InventoryItem) => {
-    // Optimistic Update
     setItems(prev => prev.map(item => item.id === updatedItem.id ? updatedItem : item));
     setEditingItem(null);
 
     try {
-      await fetch(`${API_URL}/${updatedItem.id}`, {
+      const res = await fetch(`${API_URL}/${updatedItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedItem)
       });
+      if (!res.ok) throw new Error('Update failed');
     } catch (error) {
       console.error("Error updating item:", error);
+      setServerError(true);
     }
   };
 
-  // Called when clicking trash icon
   const requestDeleteItem = (id: string) => {
     setItemToDelete(id);
   };
 
-  // Called when confirming in modal
   const confirmDeleteItem = async () => {
     if (itemToDelete) {
       const id = itemToDelete;
-      // Optimistic Update
       setItems(prev => prev.filter(item => item.id !== id));
       setItemToDelete(null);
 
       try {
-        await fetch(`${API_URL}/${id}`, {
+        const res = await fetch(`${API_URL}/${id}`, {
           method: 'DELETE'
         });
+        if (!res.ok) throw new Error('Delete failed');
       } catch (error) {
         console.error("Error deleting item:", error);
+        setServerError(true);
       }
     }
   };
@@ -136,7 +153,6 @@ const App: React.FC = () => {
 
     const newQuantity = itemToUpdate.quantity - 1;
 
-    // Optimistic Update
     setItems(prev => prev.map(item => {
       if (item.id === id) {
         return { ...item, quantity: newQuantity };
@@ -145,14 +161,15 @@ const App: React.FC = () => {
     }));
 
     try {
-      await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQuantity })
       });
+      if (!res.ok) throw new Error('Stock update failed');
     } catch (error) {
       console.error("Error buying item:", error);
-      // Revert logic could go here
+      setServerError(true);
     }
   };
 
@@ -166,7 +183,7 @@ const App: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // --- Filtering & Derived State ---
+  // --- Filtering ---
 
   const filteredItems = useMemo(() => {
     return items.filter(item => {
@@ -198,7 +215,6 @@ const App: React.FC = () => {
       .reduce((acc, curr) => acc + curr.quantity, 0);
   }, [items, currentVehicleType]);
 
-  // Section labels for UI
   const sectionLabels: Record<BikeSection, string> = {
     [BikeSection.Wheels]: "ဘီးများ",
     [BikeSection.Frame]: "ကိုယ်ထည်",
@@ -207,7 +223,6 @@ const App: React.FC = () => {
     [BikeSection.Accessories]: "အပိုပစ္စည်း"
   };
 
-  // If not authenticated, show login screen
   if (!isAuthenticated) {
     return <LoginScreen onLogin={handleLogin} error={loginError} />;
   }
@@ -219,10 +234,8 @@ const App: React.FC = () => {
       <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           
-          {/* Logo / Title */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="bg-gradient-to-tr from-sky-600 to-blue-700 w-10 h-10 rounded-lg flex items-center justify-center shadow-md shadow-sky-500/20 p-2">
-               {/* Simplified Bicycle Icon */}
                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                  <circle cx="5.5" cy="17.5" r="3.5" />
                  <circle cx="18.5" cy="17.5" r="3.5" />
@@ -239,7 +252,6 @@ const App: React.FC = () => {
             </h1>
           </div>
 
-          {/* Vehicle Type Toggle */}
           <div className="hidden sm:flex bg-slate-100 p-1 rounded-lg border border-slate-200">
              <button
                onClick={() => {
@@ -261,9 +273,7 @@ const App: React.FC = () => {
              </button>
           </div>
           
-          {/* Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Desktop Status */}
             <div className="hidden lg:flex gap-3 text-sm font-medium text-slate-600">
                {lowStockCount > 0 && (
                  <span className="flex items-center gap-1 text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-100">
@@ -298,7 +308,6 @@ const App: React.FC = () => {
           </div>
         </div>
         
-        {/* Mobile Type Toggler (Moved from top bar on very small screens if needed, but keeping simple for now) */}
         <div className="sm:hidden border-t border-slate-100 p-2 bg-white flex justify-center">
              <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 w-full max-w-xs">
                <button
@@ -323,7 +332,6 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Mobile Status Bar */}
       {(lowStockCount > 0 || outOfStockCount > 0) && (
         <div className="md:hidden bg-white border-b border-slate-200 px-4 py-2 flex gap-4 text-xs font-bold justify-center shadow-sm">
             {lowStockCount > 0 && (
@@ -341,10 +349,27 @@ const App: React.FC = () => {
       )}
 
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        
+        {/* Error Banner */}
+        {serverError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between shadow-sm">
+             <div className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <div className="flex flex-col">
+                  <span className="font-bold text-sm">ဆာဗာချိတ်ဆက်၍ မရပါ။ (Database Connection Failed)</span>
+                  <span className="text-xs">ကျေးဇူးပြု၍ ကွန်ပျူတာတွင် 'npm run dev' run ထားခြင်းရှိမရှိ စစ်ဆေးပါ။</span>
+                </div>
+             </div>
+             <button onClick={loadInventory} className="text-xs bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded font-bold transition-colors">
+               ပြန်ကြိုးစားမည်
+             </button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* Left Column: Interactive Visual */}
+          {/* Left Column: Visual & Stats */}
           <div className="lg:col-span-5 space-y-6">
             <section className="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
               <BikeVisual 
@@ -373,7 +398,7 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Inventory List */}
+          {/* Right Column: Inventory List & Search */}
           <div className="lg:col-span-7">
             <div className="sticky top-20 z-30 bg-white/95 p-4 rounded-xl border border-slate-200 mb-6 shadow-md backdrop-blur">
               <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
@@ -391,6 +416,7 @@ const App: React.FC = () => {
                   ) : (currentVehicleType === 'bicycle' ? 'စက်ဘီးပစ္စည်းများ' : 'ဆိုင်ကယ်ပစ္စည်းများ')}
                 </h2>
                 
+                {/* Search Bar - Satisfies "search item easily" request */}
                 <div className="relative w-full sm:w-auto min-w-[250px]">
                   <input
                     type="text"
@@ -439,7 +465,6 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* FOOTER with Founders Names */}
       <footer className="bg-white border-t border-slate-200 mt-auto py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex flex-col items-center gap-2">
@@ -459,7 +484,6 @@ const App: React.FC = () => {
         itemToEdit={editingItem}
       />
 
-      {/* Delete Confirmation Modal */}
       {itemToDelete && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
            <div className="bg-white w-full max-w-sm rounded-xl p-6 shadow-2xl border border-slate-200 transform transition-all scale-100">
